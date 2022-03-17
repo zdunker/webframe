@@ -7,11 +7,16 @@ import (
 type HandlerFunc func(*Context)
 
 type Engine struct {
+	*routerGroup
 	router *router
+	groups []*routerGroup
 }
 
 func NewEngine() *Engine {
-	return &Engine{router: newRouter()}
+	engine := &Engine{router: newRouter()}
+	engine.routerGroup = &routerGroup{engine: engine}
+	engine.groups = []*routerGroup{engine.routerGroup}
+	return engine
 }
 
 func (e *Engine) addRoute(method, pattern string, handler HandlerFunc) {
@@ -19,11 +24,11 @@ func (e *Engine) addRoute(method, pattern string, handler HandlerFunc) {
 }
 
 func (e *Engine) GET(pattern string, handler HandlerFunc) {
-	e.addRoute("GET", pattern, handler)
+	e.addRoute(http.MethodGet, pattern, handler)
 }
 
 func (e *Engine) POST(pattern string, handler HandlerFunc) {
-	e.addRoute("POST", pattern, handler)
+	e.addRoute(http.MethodPost, pattern, handler)
 }
 
 func (e *Engine) Run(addr string) error {

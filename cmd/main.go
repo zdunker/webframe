@@ -6,8 +6,9 @@ import (
 
 func main() {
 	engine := webframe.NewEngine()
-	engine.GET("/hello", hello)
-	engine.GET("/hello/hello", hello)
+	g := engine.NewGroup("/hello")
+	g.GET("", hello)
+	g.GET("/hello", hello)
 	engine.GET("/hello2", hello2)
 	engine.Run(":8080")
 }

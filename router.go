@@ -7,14 +7,12 @@ import (
 )
 
 type router struct {
-	handlers map[string]HandlerFunc
-	roots    map[string]*routingNode
+	roots map[string]*routingNode
 }
 
 func newRouter() *router {
 	return &router{
-		handlers: make(map[string]HandlerFunc),
-		roots:    make(map[string]*routingNode),
+		roots: make(map[string]*routingNode),
 	}
 }
 
