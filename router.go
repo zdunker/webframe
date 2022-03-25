@@ -28,7 +28,7 @@ func parseRoutingPattern(pattern string) []string {
 	return parts
 }
 
-func (r *router) addRoute(method, pattern string, handler HandlerFunc) {
+func (r *router) addRoute(method, pattern string, handler HandlerFunc, group *routerGroup) {
 	parts := parseRoutingPattern(pattern)
 	_, ok := r.roots[method]
 	if !ok {
@@ -36,7 +36,7 @@ func (r *router) addRoute(method, pattern string, handler HandlerFunc) {
 			children: make(map[string]*routingNode),
 		}
 	}
-	r.roots[method].insert(pattern, parts, handler, 0)
+	r.roots[method].insert(group, pattern, parts, handler, 0)
 }
 
 func (r *router) getRoute(method, path string) *routingNode {
@@ -51,8 +51,11 @@ func (r *router) getRoute(method, path string) *routingNode {
 func (r *router) handle(c *Context) {
 	n := r.getRoute(c.Method, c.Path)
 	if n != nil {
-		n.handler(c)
+		c.handlers = append(n.group.middlewares, n.handler)
 	} else {
-		c.ErrorResponse(http.StatusNotFound, errors.New("route not found"))
+		c.handlers = append(c.handlers, Logger(), func(ctx *Context) {
+			c.ErrorResponse(http.StatusNotFound, errors.New("route not found"))
+		})
 	}
+	c.Next()
 }

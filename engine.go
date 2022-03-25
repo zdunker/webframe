@@ -19,23 +19,22 @@ func NewEngine() *Engine {
 	return engine
 }
 
-func (e *Engine) addRoute(method, pattern string, handler HandlerFunc) {
-	e.router.addRoute(method, pattern, handler)
-}
-
-func (e *Engine) GET(pattern string, handler HandlerFunc) {
-	e.addRoute(http.MethodGet, pattern, handler)
-}
-
-func (e *Engine) POST(pattern string, handler HandlerFunc) {
-	e.addRoute(http.MethodPost, pattern, handler)
+func (e *Engine) addRoute(method, pattern string, handler HandlerFunc, group *routerGroup) {
+	e.router.addRoute(method, pattern, handler, group)
 }
 
 func (e *Engine) Run(addr string) error {
 	return http.ListenAndServe(addr, e)
 }
 
-func (engine *Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (e *Engine) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// middlewares := make([]HandlerFunc, 0)
+	// for _, group := range e.groups {
+	// 	if strings.HasPrefix(r.URL.Path, group.routePrefix) {
+	// 		middlewares = append(middlewares, group.middlewares...)
+	// 	}
+	// }
 	c := newContext(w, r)
-	engine.router.handle(c)
+	// c.handlers = middlewares
+	e.router.handle(c)
 }

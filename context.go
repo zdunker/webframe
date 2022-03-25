@@ -9,25 +9,34 @@ import (
 type M = map[string]interface{}
 
 type Context struct {
+	// context cancellation, timeout, etc.
 	context.Context
 
+	// origin http objects
 	Writer  http.ResponseWriter
 	Request *http.Request
 
+	// request related
 	Path   string
 	Method string
 
+	// response related
 	StatusCode int
+
+	// handlers
+	handlers   []HandlerFunc
+	handlerIdx int
 }
 
 func newContext(w http.ResponseWriter, r *http.Request) *Context {
 	return &Context{
 		Context: context.TODO(),
 
-		Writer:  w,
-		Request: r,
-		Path:    r.URL.Path,
-		Method:  r.Method,
+		Writer:     w,
+		Request:    r,
+		Path:       r.URL.Path,
+		Method:     r.Method,
+		handlerIdx: -1,
 	}
 }
 
@@ -72,4 +81,12 @@ func (c *Context) ErrorResponse(code int, err error) {
 	c.SetHeader("Content-Type", "text/plain")
 	c.SetStatus(code)
 	c.Writer.Write([]byte(err.Error()))
+}
+
+func (c *Context) Next() {
+	c.handlerIdx++
+	for c.handlerIdx < len(c.handlers) {
+		c.handlers[c.handlerIdx](c)
+		c.handlerIdx++
+	}
 }

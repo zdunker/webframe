@@ -12,9 +12,10 @@ func (g *routerGroup) NewGroup(prefix string, middlewares ...HandlerFunc) *route
 	newGroup := &routerGroup{
 		routePrefix: g.routePrefix + prefix,
 		engine:      g.engine,
-		middlewares: make([]HandlerFunc, 0),
+		middlewares: g.middlewares,
 	}
-	newGroup.middlewares = append(newGroup.middlewares, g.middlewares...)
+	newGroup.middlewares = append(newGroup.middlewares, middlewares...)
+	g.engine.groups = append(g.engine.groups, newGroup)
 	return newGroup
 }
 
@@ -24,7 +25,7 @@ func (g *routerGroup) WithMiddleware(mws ...HandlerFunc) *routerGroup {
 }
 
 func (g *routerGroup) addRoute(method, pattern string, handler HandlerFunc) {
-	g.engine.addRoute(method, g.routePrefix+pattern, handler)
+	g.engine.addRoute(method, g.routePrefix+pattern, handler, g)
 }
 
 func (g *routerGroup) GET(pattern string, handler HandlerFunc) {

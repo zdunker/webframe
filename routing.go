@@ -5,15 +5,19 @@ package webframe
 
 type routingNode struct {
 	children map[string]*routingNode
-	pattern  string
 	part     string
-	handler  HandlerFunc
+
+	// only leaf routing node has below properties
+	pattern string
+	handler HandlerFunc
+	group   *routerGroup
 }
 
-func (n *routingNode) insert(pattern string, parts []string, handler HandlerFunc, height int) {
+func (n *routingNode) insert(g *routerGroup, pattern string, parts []string, handler HandlerFunc, height int) {
 	if len(parts) == height {
 		n.pattern = pattern
 		n.handler = handler
+		n.group = g
 		return
 	}
 	part := parts[height]
@@ -25,7 +29,7 @@ func (n *routingNode) insert(pattern string, parts []string, handler HandlerFunc
 		}
 		n.children[part] = child
 	}
-	child.insert(pattern, parts, handler, height+1)
+	child.insert(g, pattern, parts, handler, height+1)
 }
 
 func (n *routingNode) search(parts []string, height int) *routingNode {

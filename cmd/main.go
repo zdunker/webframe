@@ -6,10 +6,11 @@ import (
 
 func main() {
 	engine := webframe.NewEngine()
-	g := engine.NewGroup("/hello")
+	g := engine.NewGroup("/group1").WithMiddleware(webframe.Logger())
 	g.GET("", hello)
 	g.GET("/hello", hello)
 	engine.GET("/hello2", hello2)
+	engine.WithMiddleware(webframe.Logger())
 	engine.Run(":8080")
 }
 
