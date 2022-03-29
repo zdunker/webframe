@@ -1,7 +1,7 @@
 package main
 
 import (
-	"webframe"
+	"github.com/zdunker/webframe"
 )
 
 func main() {
